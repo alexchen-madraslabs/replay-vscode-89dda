@@ -246,7 +246,7 @@ export class ToggleAgentSessionsViewLocationAction extends Action2 {
 }
 
 // Register the menu item - show for all local chat sessions (including history items)
-MenuRegistry.appendMenuItem(MenuId.AgentSessionsContext, {
+MenuRegistry.appendMenuItem(MenuId.ChatSessionsMenu, {
 	command: {
 		id: RenameChatSessionAction.id,
 		title: localize('renameSession', "Rename"),
@@ -255,13 +255,13 @@ MenuRegistry.appendMenuItem(MenuId.AgentSessionsContext, {
 	group: 'inline',
 	order: 1,
 	when: ContextKeyExpr.and(
-		ChatContextKeys.agentSessionType.isEqualTo(localChatSessionType),
-		ChatContextKeys.isCombinedAgentSessionsViewer.negate()
+		ChatContextKeys.sessionType.isEqualTo(localChatSessionType),
+		ChatContextKeys.isCombinedSessionViewer.negate()
 	)
 });
 
 // Register delete menu item - only show for non-active sessions (history items)
-MenuRegistry.appendMenuItem(MenuId.AgentSessionsContext, {
+MenuRegistry.appendMenuItem(MenuId.ChatSessionsMenu, {
 	command: {
 		id: DeleteChatSessionAction.id,
 		title: localize('deleteSession', "Delete"),
@@ -270,19 +270,19 @@ MenuRegistry.appendMenuItem(MenuId.AgentSessionsContext, {
 	group: 'inline',
 	order: 2,
 	when: ContextKeyExpr.and(
-		ChatContextKeys.isArchivedAgentSession.isEqualTo(true),
-		ChatContextKeys.isActiveAgentSession.isEqualTo(false)
+		ChatContextKeys.isArchivedItem.isEqualTo(true),
+		ChatContextKeys.isActiveSession.isEqualTo(false)
 	)
 });
 
-MenuRegistry.appendMenuItem(MenuId.AgentSessionsContext, {
+MenuRegistry.appendMenuItem(MenuId.ChatSessionsMenu, {
 	command: {
 		id: OpenChatSessionInSidebarAction.id,
 		title: localize('openSessionInSidebar', "Open in Sidebar")
 	},
 	group: 'navigation',
 	order: 3,
-	when: ChatContextKeys.isCombinedAgentSessionsViewer.negate()
+	when: ChatContextKeys.isCombinedSessionViewer.negate()
 });
 
 // Register the toggle command for the ViewTitle menu

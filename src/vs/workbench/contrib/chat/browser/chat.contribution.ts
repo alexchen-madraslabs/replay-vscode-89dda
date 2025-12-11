@@ -364,23 +364,18 @@ configurationRegistry.registerConfiguration({
 			enum: ['inline', 'hover', 'input', 'none'],
 			default: 'inline',
 		},
-		[ChatConfiguration.ChatViewWelcomeEnabled]: {
+		[ChatConfiguration.ChatViewRecentSessionsEnabled]: { // TODO@bpasero decide on a default
 			type: 'boolean',
-			default: true,
-			description: nls.localize('chat.welcome.enabled', "Show welcome banner when chat is empty."),
-		},
-		[ChatConfiguration.ChatViewRecentSessionsEnabled]: { // TODO@bpasero move off preview
-			type: 'boolean',
-			default: true,
-			description: nls.localize('chat.sessions.enabled', "Show recent chat agent sessions when chat is empty or to the side when chat view is wide enough."),
+			default: product.quality !== 'stable',
+			description: nls.localize('chat.sessions.enabled', "Show recent chat agent sessions when chat is empty."),
 			tags: ['preview', 'experimental'],
 			experiment: {
 				mode: 'auto'
 			}
 		},
-		[ChatConfiguration.ChatViewTitleEnabled]: { // TODO@bpasero move off preview
+		[ChatConfiguration.ChatViewTitleEnabled]: { // TODO@bpasero decide on a default
 			type: 'boolean',
-			default: true,
+			default: product.quality !== 'stable',
 			description: nls.localize('chat.viewTitle.enabled', "Show the title of the chat above the chat in the chat view."),
 			tags: ['preview', 'experimental'],
 			experiment: {
@@ -569,8 +564,8 @@ configurationRegistry.registerConfiguration({
 			type: 'string',
 			enum: ['disabled', 'view', 'single-view'], // TODO@bpasero remove this setting eventually
 			description: nls.localize('chat.sessionsViewLocation.description', "Controls where to show the agent sessions menu."),
-			default: 'disabled',
-			tags: ['preview', 'experimental'],
+			default: product.quality === 'stable' ? 'view' : 'disabled',
+			tags: ['experimental'],
 			experiment: {
 				mode: 'auto'
 			}
@@ -789,15 +784,9 @@ configurationRegistry.registerConfiguration({
 			description: nls.localize('chat.agent.thinkingStyle', "Controls how thinking is rendered."),
 			tags: ['experimental'],
 		},
-		[ChatConfiguration.ThinkingGenerateTitles]: {
-			type: 'boolean',
-			default: true,
-			description: nls.localize('chat.agent.thinking.generateTitles', "Controls whether to use an LLM to generate summary titles for thinking sections."),
-			tags: ['experimental'],
-		},
 		'chat.agent.thinking.collapsedTools': {
 			type: 'string',
-			default: 'always',
+			default: product.quality !== 'stable' ? 'always' : 'withThinking',
 			enum: ['off', 'withThinking', 'always'],
 			enumDescriptions: [
 				nls.localize('chat.agent.thinking.collapsedTools.off', "Tool calls are shown separately, not collapsed into thinking."),

@@ -153,7 +153,7 @@ export class AgentSessionRenderer implements ICompressibleTreeRenderer<IAgentSes
 		template.title.setLabel(renderAsPlaintext(markdownTitle), undefined, { matches: createMatches(session.filterData) });
 
 		// Title Actions - Update context keys
-		ChatContextKeys.isArchivedAgentSession.bindTo(template.contextKeyService).set(session.element.isArchived());
+		ChatContextKeys.isArchivedItem.bindTo(template.contextKeyService).set(session.element.isArchived());
 		template.titleToolbar.context = session.element;
 
 		// Details Actions
@@ -327,7 +327,7 @@ export interface IAgentSessionsFilter {
 	/**
 	 * Optional limit on the number of sessions to show.
 	 */
-	readonly limitResults?: () => number | undefined;
+	readonly limitResults?: number;
 
 	/**
 	 * A callback to notify the filter about the number of
@@ -358,10 +358,9 @@ export class AgentSessionsDataSource implements IAsyncDataSource<IAgentSessionsM
 		let filteredSessions = element.sessions.filter(session => !this.filter?.exclude?.(session));
 
 		// Apply limiter if configured (requires sorting)
-		const limitResultsCount = this.filter?.limitResults?.();
-		if (typeof limitResultsCount === 'number') {
+		if (this.filter?.limitResults !== undefined) {
 			filteredSessions.sort(this.sorter.compare.bind(this.sorter));
-			filteredSessions = filteredSessions.slice(0, limitResultsCount);
+			filteredSessions = filteredSessions.slice(0, this.filter.limitResults);
 		}
 
 		// Callback results count
