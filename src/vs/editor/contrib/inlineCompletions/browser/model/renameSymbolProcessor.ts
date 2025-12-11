@@ -25,7 +25,6 @@ import { renameSymbolCommandId } from '../controller/commandIds.js';
 import { InlineSuggestionItem } from './inlineSuggestionItem.js';
 import { IInlineSuggestDataActionEdit } from './provideInlineCompletions.js';
 import { InlineSuggestAlternativeAction } from './InlineSuggestAlternativeAction.js';
-import { Codicon } from '../../../../../base/common/codicons.js';
 
 enum RenameKind {
 	no = 'no',
@@ -171,29 +170,12 @@ export class RenameInferenceEngine {
 				tokenDiff += diff;
 				continue;
 			}
-			const originalStartColumn = change.originalStart + 1;
-			const isInsertion = change.originalLength === 0 && change.modifiedLength > 0;
-			let tokenInfo: { type: StandardTokenType; range: Range };
-			// Word info is left aligned whereas token info is right aligned for insertions.
-			// We prefer a suffix insertion for renames so we take the word range for the token info.
-			if (isInsertion && originalStartColumn === wordRange.endColumn && wordRange.endColumn > wordRange.startColumn) {
-				tokenInfo = this.getTokenAtPosition(textModel, new Position(startPos.lineNumber, wordRange.startColumn));
-			} else {
-				tokenInfo = this.getTokenAtPosition(textModel, startPos);
-			}
-			if (wordRange.startColumn !== tokenInfo.range.startColumn || wordRange.endColumn !== tokenInfo.range.endColumn) {
-				others.push(new TextReplacement(range, insertedTextSegment));
-				tokenDiff += diff;
-				continue;
-			}
+
+
+			const tokenInfo = this.getTokenAtPosition(textModel, startPos);
 			if (tokenInfo.type === StandardTokenType.Other) {
 
 				let identifier = textModel.getValueInRange(tokenInfo.range);
-				if (identifier.length === 0) {
-					others.push(new TextReplacement(range, insertedTextSegment));
-					tokenDiff += diff;
-					continue;
-				}
 				if (oldName === undefined) {
 					oldName = identifier;
 				} else if (oldName !== identifier) {
@@ -206,11 +188,6 @@ export class RenameInferenceEngine {
 				const tokenStartPos = textModel.getOffsetAt(tokenInfo.range.getStartPosition()) - nesOffset + tokenDiff;
 				const tokenEndPos = textModel.getOffsetAt(tokenInfo.range.getEndPosition()) - nesOffset + tokenDiff;
 				identifier = modifiedText.substring(tokenStartPos, tokenEndPos + diff);
-				if (identifier.length === 0) {
-					others.push(new TextReplacement(range, insertedTextSegment));
-					tokenDiff += diff;
-					continue;
-				}
 				if (newName === undefined) {
 					newName = identifier;
 				} else if (newName !== identifier) {
@@ -223,11 +200,7 @@ export class RenameInferenceEngine {
 					position = tokenInfo.range.getStartPosition();
 				}
 
-				if (oldName !== undefined && newName !== undefined && oldName.length > 0 && newName.length > 0 && oldName !== newName) {
-					renames.push(new TextReplacement(tokenInfo.range, newName));
-				} else {
-					renames.push(new TextReplacement(range, insertedTextSegment));
-				}
+				renames.push(new TextReplacement(range, insertedTextSegment));
 				tokenDiff += diff;
 			} else {
 				others.push(new TextReplacement(range, insertedTextSegment));
@@ -344,6 +317,7 @@ export class RenameSymbolProcessor extends Disposable {
 	}
 
 	public async proposeRenameRefactoring(textModel: ITextModel, suggestItem: InlineSuggestionItem): Promise<InlineSuggestionItem> {
+		//console.log('Propose rename refactoring for inline suggestion');
 		if (!suggestItem.supportsRename || suggestItem.action?.kind !== 'edit') {
 			return suggestItem;
 		}
@@ -366,7 +340,7 @@ export class RenameSymbolProcessor extends Disposable {
 
 		// Check asynchronously if a rename is possible
 		let timedOut = false;
-		const check = await raceTimeout<RenameKind>(this.checkRenamePrecondition(suggestItem, textModel, position, oldName, newName), 100, () => { timedOut = true; });
+		const check = await raceTimeout<RenameKind>(this.checkRenamePrecondition(suggestItem, textModel, position, oldName, newName), 1000, () => { timedOut = true; });
 		const renamePossible = check === RenameKind.yes || check === RenameKind.maybe;
 
 		suggestItem.setRenameProcessingInfo({
@@ -405,7 +379,7 @@ export class RenameSymbolProcessor extends Disposable {
 		};
 		const alternativeAction: InlineSuggestAlternativeAction = {
 			label: localize('rename', "Rename"),
-			icon: Codicon.replaceAll,
+			//icon: Codicon.replaceAll,
 			command,
 			count: runnable.getCount(),
 		};
@@ -418,7 +392,7 @@ export class RenameSymbolProcessor extends Disposable {
 			uri: textModel.uri
 		};
 
-		return InlineSuggestionItem.create(suggestItem.withAction(renameAction), textModel, false);
+		return InlineSuggestionItem.create(suggestItem.withAction(renameAction), textModel);
 	}
 
 	private async checkRenamePrecondition(suggestItem: InlineSuggestionItem, textModel: ITextModel, position: Position, oldName: string, newName: string): Promise<RenameKind> {

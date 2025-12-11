@@ -25,7 +25,6 @@ import { IChatWidget } from '../chat.js';
 import { ChatWidget } from '../chatWidget.js';
 import { dynamicVariableDecorationType } from './chatDynamicVariables.js';
 import { NativeEditContextRegistry } from '../../../../../editor/browser/controller/editContext/native/nativeEditContextRegistry.js';
-import { TextAreaEditContextRegistry } from '../../../../../editor/browser/controller/editContext/textArea/textAreaEditContextRegistry.js';
 import { CancellationToken } from '../../../../../base/common/cancellation.js';
 import { ThrottledDelayer } from '../../../../../base/common/async.js';
 
@@ -323,23 +322,14 @@ class InputEditorDecorations extends Disposable {
 
 	private updateAriaPlaceholder(value: string | undefined): void {
 		const nativeEditContext = NativeEditContextRegistry.get(this.widget.inputEditor.getId());
-		if (nativeEditContext) {
-			const domNode = nativeEditContext.domNode.domNode;
-			if (value && value.trim().length) {
-				domNode.setAttribute('aria-placeholder', value);
-			} else {
-				domNode.removeAttribute('aria-placeholder');
-			}
+		const domNode = nativeEditContext?.domNode.domNode;
+		if (!domNode) {
+			return;
+		}
+		if (value && value.trim().length) {
+			domNode.setAttribute('aria-placeholder', value);
 		} else {
-			const textAreaEditContext = TextAreaEditContextRegistry.get(this.widget.inputEditor.getId());
-			if (textAreaEditContext) {
-				const textArea = textAreaEditContext.textArea.domNode;
-				if (value && value.trim().length) {
-					textArea.setAttribute('aria-placeholder', value);
-				} else {
-					textArea.removeAttribute('aria-placeholder');
-				}
-			}
+			domNode.removeAttribute('aria-placeholder');
 		}
 	}
 }
