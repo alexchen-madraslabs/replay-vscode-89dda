@@ -46,12 +46,10 @@ export class InlineEditsGutterIndicatorData {
 
 export class InlineSuggestionGutterMenuData {
 	public static fromInlineSuggestion(suggestion: InlineSuggestionItem): InlineSuggestionGutterMenuData {
-		const alternativeAction = suggestion.action?.kind === 'edit' ? suggestion.action.alternativeAction : undefined;
 		return new InlineSuggestionGutterMenuData(
 			suggestion.gutterMenuLinkAction,
 			suggestion.source.provider.displayName ?? localize('inlineSuggestion', "Inline Suggestion"),
 			suggestion.source.inlineSuggestions.commands ?? [],
-			alternativeAction,
 			suggestion.source.provider.modelInfo,
 			suggestion.source.provider.setModelId?.bind(suggestion.source.provider),
 		);
@@ -61,7 +59,6 @@ export class InlineSuggestionGutterMenuData {
 		readonly action: Command | undefined,
 		readonly displayName: string,
 		readonly extensionCommands: InlineCompletionCommand[],
-		readonly alternativeAction: InlineSuggestAlternativeAction | undefined,
 		readonly modelInfo: IInlineCompletionModelInfo | undefined,
 		readonly setModelId: ((modelId: string) => Promise<void>) | undefined,
 	) { }
@@ -453,7 +450,7 @@ export class InlineEditsGutterIndicator extends Disposable {
 			},
 		).toDisposableLiveElement());
 
-		const focusTracker = disposableStore.add(trackFocus(content.element)); // TODO@benibenj should this be removed?
+		const focusTracker = disposableStore.add(trackFocus(content.element));
 		disposableStore.add(focusTracker.onDidBlur(() => this._focusIsInMenu.set(false, undefined)));
 		disposableStore.add(focusTracker.onDidFocus(() => this._focusIsInMenu.set(true, undefined)));
 		disposableStore.add(toDisposable(() => this._focusIsInMenu.set(false, undefined)));
@@ -490,6 +487,7 @@ export class InlineEditsGutterIndicator extends Disposable {
 				data.model.jump();
 			}
 		},
+		tabIndex: 0,
 		style: {
 			position: 'absolute',
 			overflow: 'visible',

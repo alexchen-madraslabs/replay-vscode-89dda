@@ -112,6 +112,10 @@ export async function askInPanelChat(accessor: ServicesAccessor, request: IChatR
 
 	const widget = await widgetService.openSession(newModelRef.object.sessionResource, ChatViewPaneTarget);
 
-	newModelRef.dispose(); // can be freed after opening because the widget also holds a reference
-	widget?.acceptInput(request.message.text);
+	if (!widget) {
+		newModelRef.dispose();
+		return;
+	}
+
+	widget.acceptInput(request.message.text);
 }

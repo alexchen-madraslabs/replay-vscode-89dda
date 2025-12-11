@@ -1954,7 +1954,6 @@ export class ChatWidget extends Disposable implements IChatWidget {
 
 		if (!model) {
 			this.viewModel = undefined;
-			this.onDidChangeItems();
 			return;
 		}
 

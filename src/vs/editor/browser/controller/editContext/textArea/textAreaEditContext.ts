@@ -39,7 +39,6 @@ import { ICompositionData, IPasteData, ITextAreaInputHost, TextAreaInput, TextAr
 import { ariaLabelForScreenReaderContent, newlinecount, SimplePagedScreenReaderStrategy } from '../screenReaderUtils.js';
 import { _debugComposition, ITypeData, TextAreaState } from './textAreaEditContextState.js';
 import { getMapForWordSeparators, WordCharacterClass } from '../../../../common/core/wordCharacterClassifier.js';
-import { TextAreaEditContextRegistry } from './textAreaEditContextRegistry.js';
 
 export interface IVisibleRangeProvider {
 	visibleRangeForPosition(position: Position): HorizontalPosition | null;
@@ -145,7 +144,6 @@ export class TextAreaEditContext extends AbstractEditContext {
 	private readonly _textAreaInput: TextAreaInput;
 
 	constructor(
-		ownerID: string,
 		context: ViewContext,
 		overflowGuardContainer: FastDomNode<HTMLElement>,
 		viewController: ViewController,
@@ -442,8 +440,6 @@ export class TextAreaEditContext extends AbstractEditContext {
 		this._register(IME.onDidChange(() => {
 			this._ensureReadOnlyAttribute();
 		}));
-
-		this._register(TextAreaEditContextRegistry.register(ownerID, this));
 	}
 
 	public get domNode() {

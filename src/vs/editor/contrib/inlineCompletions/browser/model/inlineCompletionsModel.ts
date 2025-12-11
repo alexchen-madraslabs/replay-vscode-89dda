@@ -919,14 +919,12 @@ export class InlineCompletionsModel extends Disposable {
 		completion.addRef();
 
 		try {
-			let followUpTrigger = false;
 			editor.pushUndoStop();
 			if (isNextEditUri) {
 				// Do nothing
 			} else if (completion.action?.kind === 'edit') {
 				const action = completion.action;
-				if (alternativeAction && action.alternativeAction) {
-					followUpTrigger = true;
+				if (action.alternativeAction && alternativeAction) {
 					const altCommand = action.alternativeAction.command;
 					await this._commandService
 						.executeCommand(altCommand.id, ...(altCommand.arguments || []))
@@ -979,11 +977,6 @@ export class InlineCompletionsModel extends Disposable {
 				await this._commandService
 					.executeCommand(completion.command.id, ...(completion.command.arguments || []))
 					.then(undefined, onUnexpectedExternalError);
-			}
-
-			// TODO: how can we make alternative actions to retrigger?
-			if (followUpTrigger) {
-				this.trigger(undefined);
 			}
 
 			completion.reportEndOfLife({ kind: InlineCompletionEndOfLifeReasonKind.Accepted });
