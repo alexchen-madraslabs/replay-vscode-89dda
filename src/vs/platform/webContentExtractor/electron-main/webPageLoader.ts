@@ -72,13 +72,6 @@ export class WebPageLoader extends Disposable {
 			.once('did-fail-load', this.onFailLoad.bind(this))
 			.once('will-navigate', this.onRedirect.bind(this))
 			.once('will-redirect', this.onRedirect.bind(this));
-
-		// Disable any UI interactions that could interfere with content loading.
-		this._window.webContents
-			.on('login', (event) => event.preventDefault())
-			.on('select-client-certificate', (event) => event.preventDefault())
-			.on('certificate-error', (event) => event.preventDefault());
-
 	}
 
 	private trace(message: string) {
@@ -171,12 +164,7 @@ export class WebPageLoader extends Disposable {
 		}
 
 		this.trace(`Received 'did-fail-load' event, code: ${statusCode}, error: '${error}'`);
-		if (statusCode === -3) {
-			this.trace(`Ignoring ERR_ABORTED (-3) as it may be caused by CSP or other measures`);
-			void this._queue.queue(() => this.extractContent());
-		} else {
-			void this._queue.queue(() => this.extractContent({ status: 'error', statusCode, error }));
-		}
+		void this._queue.queue(() => this.extractContent({ status: 'error', statusCode, error }));
 	}
 
 	/**

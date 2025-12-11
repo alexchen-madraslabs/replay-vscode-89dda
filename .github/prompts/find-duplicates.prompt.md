@@ -1,8 +1,7 @@
 ---
 # NOTE: This prompt is intended for internal use only for now.
 agent: Engineering
-argument-hint: Provide a link or issue number to find duplicates for
-description: Find duplicates for a VS Code GitHub issue
+argument-hint: "Provide an issue number to find duplicates"
 model: Claude Sonnet 4.5 (copilot)
 tools:
   - execute/getTerminalOutput
